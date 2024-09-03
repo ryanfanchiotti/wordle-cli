@@ -25,9 +25,7 @@ fn run_wordle(target_word: String, guesses: usize) -> Vec<String> {
     let target_chars: Vec<char> = target_word
         .chars()
         .collect();
-        
-    println!("{PURPLE_BOLD}-- Wordle --{RESET}");
-    
+            
     for guess_num in 1..=guesses {
         print!("{BLUE_BOLD}Guess {guess_num}:{RESET} ");
         stdout().flush().expect("Standard output flush failed");
@@ -48,7 +46,7 @@ fn run_wordle(target_word: String, guesses: usize) -> Vec<String> {
                 
             // prompt for guess if incorrect amount of letters
             if input.len() != target_size {
-                println!("{CYAN_BOLD}Letter amount mismatch: expected: {target_size}{RESET}");
+                println!("{CYAN_BOLD}Letter amount mismatch, expected: {target_size}{RESET}");
                 print!("{BLUE_BOLD}Guess {guess_num}:{RESET} ");
                 stdout().flush().expect("Standard output flush failed");
             }
