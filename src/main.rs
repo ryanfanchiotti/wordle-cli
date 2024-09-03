@@ -1,4 +1,5 @@
 mod colors;
+mod analysis;
 
 use std::io::{
     stdin, 
