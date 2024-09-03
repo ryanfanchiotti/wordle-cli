@@ -1,6 +1,18 @@
 mod colors;
-use std::io::{stdin, stdout, Write};
-use colors::*;
+
+use std::io::{
+    stdin, 
+    stdout, 
+    Write
+};
+use colors::{
+    GREEN_BOLD,
+    YELLOW_BOLD,
+    RED_BOLD,
+    CYAN_BOLD,
+    BLUE_BOLD,
+    RESET
+};
 
 // find green (exact match) and yellow (partial match) letters in current word
 fn word_cmp(cur_word: &str, target_chars: &Vec<char>) -> String {   
