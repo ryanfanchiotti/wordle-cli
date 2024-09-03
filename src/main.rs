@@ -22,9 +22,7 @@ fn run_wordle(target_word: String, guesses: usize) -> Vec<String> {
     let mut input = String::new();
     let mut answers = Vec::new();
     let target_size = target_word.len();
-    let target_chars: Vec<char> = target_word
-        .chars()
-        .collect();
+    let target_chars: Vec<char> = target_word.chars().collect();
             
     for guess_num in 1..=guesses {
         print!("{BLUE_BOLD}Guess {guess_num}:{RESET} ");
