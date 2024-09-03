@@ -37,8 +37,7 @@ fn run_wordle(target_word: String, guesses: usize) -> Vec<String> {
             stdin()
                 .read_line(&mut input)
                 .unwrap_or_else(|err| {println!("String input error: {err}"); 0});
-            input = input
-                .trim()
+            input = input.trim()
                 .to_ascii_uppercase()
                 .chars()
                 .filter(|ch| ch.is_ascii_alphabetic())
