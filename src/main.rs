@@ -34,8 +34,7 @@ fn run_wordle(target_word: String, guesses: usize) -> Vec<String> {
         // repeat input until guess is correct size
         while input.len() != target_size {
             input.clear();
-            stdin()
-                .read_line(&mut input)
+            stdin().read_line(&mut input)
                 .unwrap_or_else(|err| {println!("String input error: {err}"); 0});
             input = input.trim()
                 .to_ascii_uppercase()
