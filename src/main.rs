@@ -92,7 +92,10 @@ fn get_current_word() -> Option<String> {
     } else { return None; }
     
     if let Ok(data) = json::parse(&nyt_text) {
-        Some(data["solution"].to_string().to_uppercase())
+        let output = data["solution"].to_string().to_uppercase();
+        if output.len() == 5 {
+            Some(output)
+        } else { None }
     } else { None }
 }
 
