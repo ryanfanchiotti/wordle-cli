@@ -80,6 +80,8 @@ fn run_wordle(target_word: String, guesses: usize) -> Vec<String> {
 
 // return word associated with today's solution if possible
 fn get_current_word() -> Option<String> {
+    const EXPECTED_SIZE: usize = 5;
+    
     // solutions are stored by the day
     let current_day = prelude::Utc::now().format("%Y-%m-%d").to_string();
     let nyt_url = format!("https://www.nytimes.com/svc/wordle/v2/{current_day}.json");
@@ -93,7 +95,7 @@ fn get_current_word() -> Option<String> {
     
     if let Ok(data) = json::parse(&nyt_text) {
         let output = data["solution"].to_string().to_uppercase();
-        if output.len() == 5 {
+        if output.len() == EXPECTED_SIZE {
             Some(output)
         } else { None }
     } else { None }
