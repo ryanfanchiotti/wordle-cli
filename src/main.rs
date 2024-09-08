@@ -78,16 +78,32 @@ fn run_wordle(target_word: String, guesses: usize) -> Vec<String> {
     answers
 }
 
+fn get_current_word() -> Option<String> {
+    let current_day = prelude::Utc::now().format("%Y-%m-%d").to_string();
+    let nyt_url = format!("https://www.nytimes.com/svc/wordle/v2/{current_day}.json");
+    
+    let nyt_text: String;
+    if let Ok(nyt_response) = blocking::get(nyt_url) {
+        if let Ok(nyt_json_text) = nyt_response.text() {
+            nyt_text = nyt_json_text;
+        } else { return None; }
+    } else { return None; }
+    
+    if let Ok(data) = json::parse(&nyt_text) {
+        Some(data["solution"].to_string().to_uppercase())
+    } else { None }
+}
+
 fn main() {
-    // constants for now
     const GUESSES: usize = 6;
     const _FILENAME: &str = "";
     
-    let current_day = prelude::Utc::now().format("%Y-%m-%d").to_string();
-    let nyt_url = format!("https://www.nytimes.com/svc/wordle/v2/{current_day}.json");
-    let nyt_response = blocking::get(nyt_url).unwrap().text().unwrap();
-    let data = json::parse(&nyt_response).unwrap();
-    let current_word: &str = &data["solution"].to_string().to_uppercase();
+    let _answers;
     
-    let _answers = run_wordle(current_word.to_string(), GUESSES);
+    if let Some(word) = get_current_word() {
+        _answers = run_wordle(word, GUESSES);
+    } else {
+        println!("There was an issue getting current Wordle data from the NYT API, please check your internet connection or try later");
+        return; 
+    } 
 }
