@@ -1,4 +1,5 @@
 ## Wordle CLI
 
-play wordle from your terminal; run with `cargo run`\
-answers sourced from New York Times wordle word of the day through NYT API
+Play Wordle from your terminal!\
+Answers sourced from New York Times Wordle word of the day through their API.\
+Run with `cargo run`
