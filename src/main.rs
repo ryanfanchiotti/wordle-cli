@@ -79,11 +79,9 @@ fn run_wordle(target_word: String, guesses: usize) -> Vec<String> {
 }
 
 // return word associated with today's solution if possible
-fn get_current_word() -> Option<String> {
+fn get_wordle_word(current_day: String) -> Option<String> {
     const EXPECTED_SIZE: usize = 5;
     
-    // solutions are stored by the day
-    let current_day = prelude::Utc::now().format("%Y-%m-%d").to_string();
     let nyt_url = format!("https://www.nytimes.com/svc/wordle/v2/{current_day}.json");
     
     let nyt_text: String;
@@ -105,12 +103,15 @@ fn main() {
     const GUESSES: usize = 6;
     const _FILENAME: &str = "";
     
-    let _answers;
+    // solutions are stored by the day
+    let current_day = prelude::Utc::now().format("%Y-%m-%d").to_string();
+    println!("{CYAN_BOLD}Wordle for {current_day}:{RESET}");
     
-    if let Some(word) = get_current_word() {
+    let _answers;
+    if let Some(word) = get_wordle_word(current_day) {
         _answers = run_wordle(word, GUESSES);
     } else {
-        println!("There was an issue getting current Wordle data from the NYT API, please check your internet connection or try later");
+        println!("There was an issue getting today's Wordle data from the NYT API, please check your internet connection or try later");
         return; 
     } 
 }
