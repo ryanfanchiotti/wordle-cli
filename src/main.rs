@@ -14,6 +14,8 @@ use colors::{
     BLUE_BOLD,
     RESET
 };
+use chrono::prelude;
+use reqwest::blocking;
 
 // find green (exact match) and yellow (partial match) letters in current word
 fn word_cmp(cur_word: &str, target_chars: &Vec<char>) -> String {   
@@ -77,5 +79,15 @@ fn run_wordle(target_word: String, guesses: usize) -> Vec<String> {
 }
 
 fn main() {
-    let _answers = run_wordle("CRANE".to_string(), 6);
+    // constants for now
+    const GUESSES: usize = 6;
+    const _FILENAME: &str = "";
+    
+    let current_day = prelude::Utc::now().format("%Y-%m-%d").to_string();
+    let nyt_url = format!("https://www.nytimes.com/svc/wordle/v2/{current_day}.json");
+    let nyt_response = blocking::get(nyt_url).unwrap().text().unwrap();
+    let data = json::parse(&nyt_response).unwrap();
+    let current_word: &str = &data["solution"].to_string().to_uppercase();
+    
+    let _answers = run_wordle(current_word.to_string(), GUESSES);
 }
