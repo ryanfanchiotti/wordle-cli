@@ -14,6 +14,7 @@ use colors::{
     NORMAL_BOLD,
     RESET
 };
+use analysis::WordleAnalyzer;
 use chrono::prelude;
 use reqwest::blocking;
 use std::fs::read_to_string;
@@ -126,7 +127,7 @@ fn main() {
     const _FILENAME: &str = "";
     
     // make hash sets from possible answers and words text files
-    let mut _possible_answers = file_to_hash_set(
+    let mut possible_answers = file_to_hash_set(
         "words/possible_answers.txt", 
         "Possible answers file not found"
     );
@@ -143,7 +144,7 @@ fn main() {
     let current_word;
     if let Some(word) = get_wordle_word(current_day) {
         possible_words.insert(word.clone());
-        _possible_answers.insert(word.clone());
+        possible_answers.insert(word.clone());
         current_word = word;
     } else {
         println!("There was an issue getting today's Wordle data, please check your internet connection or try again later");
@@ -151,5 +152,7 @@ fn main() {
     } 
     
     // create vec of answers for analysis
-    let _answers = run_wordle(current_word, GUESSES, &possible_words);
+    let answers = run_wordle(current_word, GUESSES, &possible_words);
+    
+    let analyzer = WordleAnalyzer::new(possible_words, possible_answers, answers);
 }
