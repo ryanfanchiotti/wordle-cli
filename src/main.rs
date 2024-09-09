@@ -16,6 +16,8 @@ use colors::{
 };
 use chrono::prelude;
 use reqwest::blocking;
+use std::fs::read_to_string;
+use std::collections::HashSet;
 
 // find green (exact match) and yellow (partial match) letters in current word
 fn word_cmp(cur_word: &str, target_chars: &Vec<char>) -> String {   
@@ -103,6 +105,18 @@ fn main() {
     const GUESSES: usize = 6;
     const _FILENAME: &str = "";
     
+    // make hash sets from possible answers and words text files
+    let possible_answers: HashSet<String> = read_to_string("words/possible_answers.txt")
+        .expect("Possible answers file not found")
+        .split("\n")
+        .map(|s| s.to_uppercase())
+        .collect();
+    let possible_words: HashSet<String> = read_to_string("words/possible_words.txt")
+        .expect("Possible words to enter file not found")
+        .split("\n")
+        .map(|s| s.to_uppercase())
+        .collect();
+        
     // solutions are stored by the day
     let current_day = prelude::Utc::now().format("%Y-%m-%d").to_string();
     println!("{CYAN_BOLD}Wordle for {current_day}:{RESET}");
