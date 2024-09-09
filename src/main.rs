@@ -126,11 +126,11 @@ fn main() {
     const _FILENAME: &str = "";
     
     // make hash sets from possible answers and words text files
-    let _possible_answers = file_to_hash_set(
+    let mut _possible_answers = file_to_hash_set(
         "words/possible_answers.txt", 
         "Possible answers file not found"
     );
-    let possible_words = file_to_hash_set(
+    let mut possible_words = file_to_hash_set(
         "words/possible_words.txt", 
         "Possible words to enter file not found"
     );
@@ -138,12 +138,18 @@ fn main() {
     // solutions are stored by the day
     let current_day = prelude::Utc::now().format("%Y-%m-%d").to_string();
     println!("{NORMAL_BOLD}Wordle for {current_day}:{RESET}");
-    
-    let _answers;
+        
+    // find current word and insert it into word lists
+    let current_word;
     if let Some(word) = get_wordle_word(current_day) {
-        _answers = run_wordle(word, GUESSES, &possible_words);
+        possible_words.insert(word.clone());
+        _possible_answers.insert(word.clone());
+        current_word = word;
     } else {
         println!("There was an issue getting today's Wordle data, please check your internet connection or try again later");
         return; 
     } 
+    
+    // create vec of answers for analysis
+    let _answers = run_wordle(current_word, GUESSES, &possible_words);
 }
