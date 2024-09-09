@@ -113,21 +113,27 @@ fn get_wordle_word(current_day: String) -> Option<String> {
     } else { None }
 }
 
+fn file_to_hash_set(filename: &str, error_message: &str) -> HashSet<String> {
+    read_to_string(filename)
+        .expect(error_message)
+        .split("\n")
+        .map(|s| s.to_uppercase())
+        .collect()
+}
+
 fn main() {
     const GUESSES: usize = 6;
     const _FILENAME: &str = "";
     
     // make hash sets from possible answers and words text files
-    let possible_answers: HashSet<String> = read_to_string("words/possible_answers.txt")
-        .expect("Possible answers file not found")
-        .split("\n")
-        .map(|s| s.to_uppercase())
-        .collect();
-    let possible_words: HashSet<String> = read_to_string("words/possible_words.txt")
-        .expect("Possible words to enter file not found")
-        .split("\n")
-        .map(|s| s.to_uppercase())
-        .collect();
+    let possible_answers = file_to_hash_set(
+        "words/possible_answers.txt", 
+        "Possible answers file not found"
+    );
+    let possible_words = file_to_hash_set(
+        "words/possible_words.txt", 
+        "Possible words to enter file not found"
+    );
         
     // solutions are stored by the day
     let current_day = prelude::Utc::now().format("%Y-%m-%d").to_string();
