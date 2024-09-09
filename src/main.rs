@@ -66,13 +66,13 @@ fn run_wordle(target_word: String, guesses: usize, possible_words: &HashSet<Stri
                 
             // check if incorrect amount of letters
             if input.len() != target_size {
-                println!("{RED_BOLD}Letter amount mismatch, expected: {target_size}{RESET}");
+                println!("{RED_BOLD}Letter amount mismatch, expected {target_size}{RESET}");
                 continue;
             }
             
             // check if word is valid
             if !possible_words.contains(&input) {
-                println!("{RED_BOLD}Invalid Word{RESET}");
+                println!("{RED_BOLD}Invalid word{RESET}");
                 input.clear();
             }
         }
@@ -126,7 +126,7 @@ fn main() {
     const _FILENAME: &str = "";
     
     // make hash sets from possible answers and words text files
-    let possible_answers = file_to_hash_set(
+    let _possible_answers = file_to_hash_set(
         "words/possible_answers.txt", 
         "Possible answers file not found"
     );
@@ -143,7 +143,7 @@ fn main() {
     if let Some(word) = get_wordle_word(current_day) {
         _answers = run_wordle(word, GUESSES, &possible_words);
     } else {
-        println!("There was an issue getting today's Wordle data from the NYT API, please check your internet connection or try later");
+        println!("There was an issue getting today's Wordle data, please check your internet connection or try again later");
         return; 
     } 
 }
