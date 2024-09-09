@@ -10,8 +10,8 @@ use colors::{
     GREEN_BOLD,
     YELLOW_BOLD,
     RED_BOLD,
-    CYAN_BOLD,
     BLUE_BOLD,
+    NORMAL_BOLD,
     RESET
 };
 use chrono::prelude;
@@ -26,7 +26,7 @@ fn word_cmp(cur_word: &str, target_chars: &Vec<char>) -> String {
     for (letter, target_letter) in cur_word.chars().zip(target_chars.into_iter()) {
         if letter == *target_letter { output += GREEN_BOLD; }
         else if target_chars.contains(&letter) { output += YELLOW_BOLD; }
-        else { output += RED_BOLD; }
+        else { output += NORMAL_BOLD; }
         output.push(letter);
         output += RESET;
         output.push(' ');
@@ -35,33 +35,45 @@ fn word_cmp(cur_word: &str, target_chars: &Vec<char>) -> String {
 }
 
 // run main wordle simulation and parse input
-fn run_wordle(target_word: String, guesses: usize) -> Vec<String> {
+fn run_wordle(target_word: String, guesses: usize, possible_words: &HashSet<String>) -> Vec<String> {
     let mut input = String::new();
     let mut answers = Vec::new();
     let target_size = target_word.len();
     let target_chars: Vec<char> = target_word.chars().collect();
             
     for guess_num in 1..=guesses {
-        print!("{BLUE_BOLD}Guess {guess_num}:{RESET} ");
-        stdout().flush().expect("Standard output flush failed");
+        // make sure input is not already a valid guess
         input.clear();
         
-        // repeat input until guess is correct size
+        // repeat user input until guess is correct size
         while input.len() != target_size {
+            // display guess number
+            print!("{BLUE_BOLD}Guess {guess_num}:{RESET} ");
+            stdout()
+                .flush()
+                .expect("Standard output flush failed");
             input.clear();
-            stdin().read_line(&mut input)
+            
+            stdin()
+                .read_line(&mut input)
                 .unwrap_or_else(|err| {println!("String input error: {err}"); 0});
-            input = input.trim()
-                .to_ascii_uppercase()
-                .chars()
-                .filter(|ch| ch.is_ascii_alphabetic())
-                .collect();
+            input = input
+                        .trim()
+                        .to_ascii_uppercase()
+                        .chars()
+                        .filter(|ch| ch.is_ascii_alphabetic())
+                        .collect();
                 
-            // prompt for guess if incorrect amount of letters
+            // check if incorrect amount of letters
             if input.len() != target_size {
-                println!("{CYAN_BOLD}Letter amount mismatch, expected: {target_size}{RESET}");
-                print!("{BLUE_BOLD}Guess {guess_num}:{RESET} ");
-                stdout().flush().expect("Standard output flush failed");
+                println!("{RED_BOLD}Letter amount mismatch, expected: {target_size}{RESET}");
+                continue;
+            }
+            
+            // check if word is valid
+            if !possible_words.contains(&input) {
+                println!("{RED_BOLD}Invalid Word{RESET}");
+                input.clear();
             }
         }
         
@@ -119,11 +131,11 @@ fn main() {
         
     // solutions are stored by the day
     let current_day = prelude::Utc::now().format("%Y-%m-%d").to_string();
-    println!("{CYAN_BOLD}Wordle for {current_day}:{RESET}");
+    println!("{NORMAL_BOLD}Wordle for {current_day}:{RESET}");
     
     let _answers;
     if let Some(word) = get_wordle_word(current_day) {
-        _answers = run_wordle(word, GUESSES);
+        _answers = run_wordle(word, GUESSES, &possible_words);
     } else {
         println!("There was an issue getting today's Wordle data from the NYT API, please check your internet connection or try later");
         return; 
