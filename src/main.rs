@@ -18,19 +18,31 @@ use analysis::WordleAnalyzer;
 use chrono::prelude;
 use reqwest::blocking;
 use std::fs::read_to_string;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 // find green (exact match) and yellow (partial match) letters in current word
 fn word_cmp(cur_word: &str, target_chars: &Vec<char>) -> String {   
     let mut output = String::new();
+    let mut chars_count: HashMap<char, usize> = HashMap::new();
     
+    // count is kept track of here to make sure letters appear yellow as many times as they are in target
     for (letter, target_letter) in cur_word.chars().zip(target_chars.into_iter()) {
+        // push letter color and letter to output string
+        let letter_count = target_chars
+            .iter()
+            .filter(|c| **c == letter)
+            .count();
         if letter == *target_letter { output += GREEN_BOLD; }
-        else if target_chars.contains(&letter) { output += YELLOW_BOLD; }
+        else if target_chars.contains(&letter) 
+            && (!chars_count.contains_key(&letter) || chars_count[&letter] < letter_count) { output += YELLOW_BOLD; }
         else { output += NORMAL_BOLD; }
+        
         output.push(letter);
         output += RESET;
         output.push(' ');
+        
+        // update count of letter
+        *chars_count.entry(letter).or_insert(0) += 1;
     }
     output.trim_end().to_string()
 }
@@ -114,6 +126,7 @@ fn get_wordle_word(current_day: String) -> Option<String> {
     } else { None }
 }
 
+// takes filename of words separated by newlines, creates a hashset containing all words
 fn file_to_hash_set(filename: &str, error_message: &str) -> HashSet<String> {
     read_to_string(filename)
         .expect(error_message)
@@ -154,5 +167,5 @@ fn main() {
     // create vec of answers for analysis
     let answers = run_wordle(current_word, GUESSES, &possible_words);
     
-    let analyzer = WordleAnalyzer::new(possible_words, possible_answers, answers);
+    //let analyzer = WordleAnalyzer::new(possible_words, possible_answers, answers);
 }
