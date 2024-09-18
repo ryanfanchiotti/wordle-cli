@@ -1,16 +1,21 @@
 use std::cmp::min;
+use itertools::izip;
 
 // check if a word is possible after a guess (assuming the correct answer)
 fn is_possible(guess: &str, left: &str, answer: &str) -> bool {
     // filtering criteria: letter count and exact matches
-    for (i, (guess_letter, ans_letter)) in guess.chars().zip(answer.chars()).enumerate() {
-        // exact match and char is not present at index in left
-        if guess_letter == ans_letter && left.chars().nth(i).unwrap() != guess_letter { return false; }
-        // if min(guess letter count, ans letter count) > answer letter count, left is removed
-        if min(
-            guess.chars().filter(|chr| *chr == guess_letter).count(),
-            answer.chars().filter(|chr| *chr == guess_letter).count()
-        ) > left.chars().filter(|chr| *chr == guess_letter).count() {  return false; }
+    for (guess_letter, ans_letter, left_letter) in izip!(guess.chars(), answer.chars(), left.chars()) {
+        // guess and answer match, not present at index in left
+        if guess_letter == ans_letter && left_letter != guess_letter { return false; }
+        // left and guess match, not present at index in answer
+        if left_letter == guess_letter && ans_letter != guess_letter { return false; }
+        
+        let left_chr_cnt = left.chars().filter(|chr| *chr == guess_letter).count();
+        let ans_chr_cnt = answer.chars().filter(|chr| *chr == guess_letter).count();
+        let guess_chr_cnt = guess.chars().filter(|chr| *chr == guess_letter).count();
+        
+        // if min(guess letter count, ans letter count) > left letter count, left is removed
+        if min(guess_chr_cnt,ans_chr_cnt) > left_chr_cnt { return false; }
     }
     
     true
@@ -45,7 +50,6 @@ impl WordleAnalyzer {
                 left = guess_score;
             }
         }
-        
         guess_scores.iter().filter(|still_left| **still_left < left).count()
     }
     

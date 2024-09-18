@@ -165,9 +165,11 @@ fn main() {
     let mut analyzer = WordleAnalyzer::new(total_vec, possible_vec);
     let total_words = possible_words.len();
     
+    println!("{BLUE_BOLD}Analyzing guesses...{RESET}");
+    
     for guess in answers {
         let score = analyzer.guess(guess.clone(), current_word.clone());
-        println!("{NORMAL_BOLD}Guess {BLUE_BOLD}{guess}{RESET}{NORMAL_BOLD} eliminated the same or more words compared to {RED_BOLD}{:.2}%{RESET}{NORMAL_BOLD} of possible guesses{RESET}", 
+        println!("{NORMAL_BOLD}Guess {BLUE_BOLD}{guess}{RESET}{NORMAL_BOLD} eliminated the same or more words as {RED_BOLD}{:.2}%{RESET}{NORMAL_BOLD} of possible guesses{RESET}", 
             ((total_words - score) as f64 / total_words as f64) * 100f64);
         analyzer.filter_words(guess.clone(), &current_word);
     }
