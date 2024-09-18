@@ -127,9 +127,9 @@ fn get_wordle_word(current_day: String) -> Option<String> {
 }
 
 // takes filename of words separated by newlines, creates a hashset containing all words
-fn file_to_hash_set(filename: &str, error_message: &str) -> HashSet<String> {
+fn file_to_hash_set(filename: &str) -> HashSet<String> {
     read_to_string(filename)
-        .expect(error_message)
+        .expect(&format!("{filename} not found"))
         .split("\n")
         .map(|s| s.to_uppercase())
         .collect()
@@ -140,14 +140,8 @@ fn main() {
     const _FILENAME: &str = "";
     
     // make hash sets from possible answers and words text files
-    let mut possible_answers = file_to_hash_set(
-        "words/possible_answers.txt", 
-        "Possible answers file not found"
-    );
-    let mut possible_words = file_to_hash_set(
-        "words/possible_words.txt", 
-        "Possible words to enter file not found"
-    );
+    let mut possible_answers = file_to_hash_set("words/possible_answers.txt");
+    let mut possible_words = file_to_hash_set("words/possible_words.txt");
         
     // solutions are stored by the day
     let current_day = prelude::Utc::now().format("%Y-%m-%d").to_string();
@@ -165,7 +159,16 @@ fn main() {
     } 
     
     // create vec of answers for analysis
-    let answers = run_wordle(current_word, GUESSES, &possible_words);
+    let answers = run_wordle(current_word.clone(), GUESSES, &possible_words);
+    let total_vec: Vec<String> = possible_words.clone().into_iter().collect();
+    let possible_vec: Vec<String> = possible_answers.clone().into_iter().collect();
+    let mut analyzer = WordleAnalyzer::new(total_vec, possible_vec);
+    let total_words = possible_words.len();
     
-    //let analyzer = WordleAnalyzer::new(possible_words, possible_answers, answers);
+    for guess in answers {
+        let score = analyzer.guess(guess.clone(), current_word.clone());
+        println!("{NORMAL_BOLD}Guess {BLUE_BOLD}{guess}{RESET}{NORMAL_BOLD} eliminated the same or more words compared to {RED_BOLD}{:.2}%{RESET}{NORMAL_BOLD} of possible guesses{RESET}", 
+            ((total_words - score) as f64 / total_words as f64) * 100f64);
+        analyzer.filter_words(guess.clone(), &current_word);
+    }
 }
