@@ -56,9 +56,9 @@ impl WordleAnalyzer {
     // remove impossible words from pool
     pub fn filter_words(&mut self, guess: String, answer: &str) {
         self.current_words = self.current_words
-                                .iter()
-                                .filter(|word| is_possible(&guess, word, answer))
-                                .cloned()
-                                .collect();
+            .iter()
+            .filter(|word| is_possible(&guess, word, answer))
+            .cloned()
+            .collect();
     }
 }
