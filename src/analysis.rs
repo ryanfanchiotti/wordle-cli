@@ -1,5 +1,6 @@
 use std::cmp::min;
 use itertools::izip;
+use rayon::prelude::*;
 
 // check if a word is possible after a guess (assuming the correct answer)
 fn is_possible(guess: &str, left: &str, answer: &str) -> bool {
@@ -34,25 +35,25 @@ impl WordleAnalyzer {
         }
     }
     
-    // map each possible guess to possible words left and return amount of guesses that beat input guess
+    // map each possible guess to possible words left and return amount of guesses that beat input guess    
     pub fn guess(&self, word: String, answer: String) -> usize {
-        let mut guess_scores: Vec<usize> = Vec::new();
-        let mut left: usize = 0;
+        let left = self.current_words
+            .iter()
+            .filter(|possible_left| is_possible(&word, possible_left, &answer))
+            .count();
         
-        for possible_guess in &self.all_words {
-            let mut guess_score: usize = 0;
-            for possible_left in &self.current_words {
-                // check how many words are possible answers after guess for each possible word
-                guess_score += is_possible(possible_guess, possible_left, &answer) as usize;
-            }
-            guess_scores.push(guess_score);
-            if possible_guess == &word {
-                left = guess_score;
-            }
-        }
+        let guess_scores: Vec<usize> = self.all_words
+            .par_iter()
+            .map(|possible_guess| self.current_words
+                .iter()
+                .filter(|possible_left| is_possible(possible_guess, possible_left, &answer))
+                .count())
+            .collect();
+        
         guess_scores.iter().filter(|still_left| **still_left < left).count()
     }
     
+    // remove impossible words from pool
     pub fn filter_words(&mut self, guess: String, answer: &str) {
         self.current_words = self.current_words
                                 .iter()
