@@ -37,11 +37,13 @@ impl WordleAnalyzer {
     
     // map each possible guess to possible words left and return amount of guesses that beat input guess    
     pub fn guess(&self, word: String, answer: String) -> usize {
+        // possible remaining words to pick between for guess
         let left = self.current_words
             .iter()
             .filter(|possible_left| is_possible(&word, possible_left, &answer))
             .count();
         
+        // create vector of possible remaining words to pick between for each word
         let guess_scores: Vec<usize> = self.all_words
             .par_iter()
             .map(|possible_guess| self.current_words
