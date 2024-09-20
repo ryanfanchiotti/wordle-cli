@@ -178,8 +178,8 @@ fn main() {
         let score = analyzer.guess(guess.clone(), current_word.clone());
         let percentile = ((total_words - score) as f64 / total_words as f64) * 100f64;
         let mut spaces: usize = 4;
-        if percentile < 10.00 { spaces = 6 }
-        else if percentile < 99.99 { spaces = 5 }
+        if percentile < 10.0 { spaces = 6 }
+        else if percentile < 99.9999 { spaces = 5 }
         
         println!("| {guess} | {:.2} {}|", percentile, " ".repeat(spaces));
         analyzer.filter_words(guess.clone(), &current_word);
