@@ -10,14 +10,12 @@ use colors::{
     GREEN_BOLD,
     YELLOW_BOLD,
     RED_BOLD,
-    BLUE_BOLD,
     NORMAL_BOLD,
     RESET
 };
 use analysis::WordleAnalyzer;
 use chrono::prelude;
 use reqwest::blocking;
-use std::fs::read_to_string;
 use std::collections::{HashMap, HashSet};
 
 // find green (exact match) and yellow (partial match) letters in current word
@@ -61,7 +59,7 @@ fn run_wordle(target_word: String, guesses: usize, possible_words: &HashSet<Stri
         // repeat user input until guess is correct size
         while input.len() != target_size {
             // display guess number
-            print!("{BLUE_BOLD}Guess {guess_num}:{RESET} ");
+            print!("{NORMAL_BOLD}Guess {guess_num}: {RESET}");
             stdout()
                 .flush()
                 .expect("Standard output flush failed");
@@ -71,11 +69,11 @@ fn run_wordle(target_word: String, guesses: usize, possible_words: &HashSet<Stri
                 .read_line(&mut input)
                 .unwrap_or_else(|err| {println!("String input error: {err}"); 0});
             input = input
-                        .trim()
-                        .to_ascii_uppercase()
-                        .chars()
-                        .filter(|ch| ch.is_ascii_alphabetic())
-                        .collect();
+                .trim()
+                .to_ascii_uppercase()
+                .chars()
+                .filter(|ch| ch.is_ascii_alphabetic())
+                .collect();
                 
             // check if incorrect amount of letters
             if input.len() != target_size {
@@ -126,22 +124,23 @@ fn get_wordle_word(current_day: String) -> Option<String> {
     } else { None }
 }
 
-// takes filename of words separated by newlines, creates a hashset containing all words
-fn file_to_hash_set(filename: &str) -> HashSet<String> {
-    read_to_string(filename)
-        .expect(&format!("{filename} not found"))
-        .split("\n")
-        .map(|s| s.to_uppercase())
-        .collect()
-}
-
 fn main() {
     const GUESSES: usize = 6;
     const _FILENAME: &str = "";
     
+    // include all words when compiling
+    let pos_ans_filestr = include_str!("../words/possible_answers.txt");
+    let pos_word_filestr = include_str!("../words/possible_words.txt");
+    
     // make hash sets from possible answers and words text files
-    let mut possible_answers = file_to_hash_set("words/possible_answers.txt");
-    let mut possible_words = file_to_hash_set("words/possible_words.txt");
+    let mut possible_answers: HashSet<String> = pos_ans_filestr
+        .split("\n")
+        .map(|s| s.to_uppercase())
+        .collect();
+    let mut possible_words: HashSet<String> = pos_word_filestr
+        .split("\n")
+        .map(|s| s.to_uppercase())
+        .collect();
         
     // solutions are stored by the day
     let current_day = prelude::Utc::now().format("%Y-%m-%d").to_string();
@@ -152,7 +151,7 @@ fn main() {
     if let Some(word) = get_wordle_word(current_day) {
         possible_words.insert(word.clone());
         possible_answers.insert(word.clone());
-        current_word = word;
+        current_word = word.to_uppercase();
     } else {
         println!("There was an issue getting today's Wordle data, please check your internet connection or try again later");
         return; 
@@ -165,12 +164,23 @@ fn main() {
     let mut analyzer = WordleAnalyzer::new(total_vec, possible_vec);
     let total_words = possible_words.len();
     
-    println!("{BLUE_BOLD}Analyzing guesses...{RESET}");
+    if answers.len() == GUESSES && answers.last().unwrap() != &current_word {
+        println!("{NORMAL_BOLD}Correct word was: {RED_BOLD}{current_word}{RESET}")
+    }
+    
+    println!("{NORMAL_BOLD}Analyzing guesses...{RESET}");
+    println!("----------------------");
+    println!("| Guess | Percentile |");
     
     for guess in answers {
         let score = analyzer.guess(guess.clone(), current_word.clone());
-        println!("{NORMAL_BOLD}Guess {BLUE_BOLD}{guess}{RESET}{NORMAL_BOLD} eliminated the same or more words as {RED_BOLD}{:.2}%{RESET}{NORMAL_BOLD} of possible guesses{RESET}", 
-            ((total_words - score) as f64 / total_words as f64) * 100f64);
+        let percentile = ((total_words - score) as f64 / total_words as f64) * 100f64;
+        let mut spaces: usize = 4;
+        if percentile < 10.00 { spaces = 6 }
+        else if percentile < 99.99 { spaces = 5 }
+        
+        println!("| {guess} | {:.2} {}|", percentile, " ".repeat(spaces));
         analyzer.filter_words(guess.clone(), &current_word);
     }
+    println!("----------------------");
 }
