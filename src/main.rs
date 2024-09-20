@@ -59,7 +59,7 @@ fn run_wordle(target_word: String, guesses: usize, possible_words: &HashSet<Stri
         // repeat user input until guess is correct size
         while input.len() != target_size {
             // display guess number
-            print!("{NORMAL_BOLD}Guess {guess_num}: {RESET}");
+            print!("Guess {guess_num}: ");
             stdout()
                 .flush()
                 .expect("Standard output flush failed");
@@ -89,8 +89,10 @@ fn run_wordle(target_word: String, guesses: usize, possible_words: &HashSet<Stri
         }
         
         // print current word with green / yellow / red coloring
+        println!("-------------");
         let output_str = word_cmp(&input, &target_chars); 
-        println!("{output_str}");
+        println!("| {output_str} |");
+        println!("-------------");
         
         // add current word to vec of answers
         answers.push(input.to_string());
@@ -165,12 +167,12 @@ fn main() {
     let total_words = possible_words.len();
     
     if answers.len() == GUESSES && answers.last().unwrap() != &current_word {
-        println!("{NORMAL_BOLD}Correct word was: {RED_BOLD}{current_word}{RESET}")
+        println!("Correct word was: {RED_BOLD}{current_word}{RESET}")
     }
     
-    println!("{NORMAL_BOLD}Analyzing guesses...{RESET}");
     println!("----------------------");
     println!("| Guess | Percentile |");
+    println!("----------------------");
     
     for guess in answers {
         let score = analyzer.guess(guess.clone(), current_word.clone());
