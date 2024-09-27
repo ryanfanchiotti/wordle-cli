@@ -158,6 +158,7 @@ fn main() {
     let current_word;
     // check for word input
     if matches.contains_id("word"){
+        println!("{NORMAL_BOLD}Custom Wordle:{RESET}");
         let word = matches.get_one::<String>("word").unwrap().to_owned();
         if word.len() != WORD_SIZE {
             println!("Input word '{}' is incorrect length, expected: {WORD_SIZE}", word.to_uppercase());
