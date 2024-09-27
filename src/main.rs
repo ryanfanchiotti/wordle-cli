@@ -17,6 +17,7 @@ use analysis::WordleAnalyzer;
 use chrono::prelude;
 use reqwest::blocking;
 use std::collections::{HashMap, HashSet};
+use clap::{Arg, Command};
 
 // find green (exact match) and yellow (partial match) letters in current word
 fn word_cmp(cur_word: &str, target_chars: &Vec<char>) -> String {   
@@ -128,7 +129,7 @@ fn get_wordle_word(current_day: String) -> Option<String> {
 
 fn main() {
     const GUESSES: usize = 6;
-    const _FILENAME: &str = "";
+    const WORD_SIZE: usize = 5;
     
     // include all words when compiling
     let pos_ans_filestr = include_str!("../words/possible_answers.txt");
@@ -144,20 +145,40 @@ fn main() {
         .map(|s| s.to_uppercase())
         .collect();
         
-    // solutions are stored by the day
-    let current_day = prelude::Utc::now().format("%Y-%m-%d").to_string();
-    println!("{NORMAL_BOLD}Wordle for {current_day}:{RESET}");
+    let matches = Command::new("wordle-cli")
+        .arg(
+            Arg::new("word")
+            .help("Optional input word")
+            .short('w')
+            .long("word")
+            .value_parser(clap::value_parser!(String))
+        )
+        .get_matches();
         
-    // find current word and insert it into word lists
     let current_word;
-    if let Some(word) = get_wordle_word(current_day) {
-        possible_words.insert(word.clone());
-        possible_answers.insert(word.clone());
+    // check for word input
+    if matches.contains_id("word"){
+        let word = matches.get_one::<String>("word").unwrap().to_owned();
+        if word.len() != WORD_SIZE {
+            println!("Input word '{}' is incorrect length, expected: {WORD_SIZE}", word.to_uppercase());
+            return;
+        }
         current_word = word.to_uppercase();
     } else {
-        println!("There was an issue getting today's Wordle data, please check your internet connection or try again later");
-        return; 
-    } 
+        // solutions are stored by the day
+        let current_day = prelude::Utc::now().format("%Y-%m-%d").to_string();
+        println!("{NORMAL_BOLD}Wordle for {current_day}:{RESET}");
+        
+        // find current word and insert it into word lists
+        if let Some(word) = get_wordle_word(current_day) {
+            current_word = word.to_uppercase();
+        } else {
+            println!("There was an issue getting today's Wordle data, please check your internet connection or try again later");
+            return; 
+        } 
+    }
+    possible_words.insert(current_word.clone());
+    possible_answers.insert(current_word.clone());
     
     // create vec of answers for analysis
     let answers = run_wordle(current_word.clone(), GUESSES, &possible_words);
@@ -167,7 +188,7 @@ fn main() {
     let total_words = possible_words.len();
     
     if answers.len() == GUESSES && answers.last().unwrap() != &current_word {
-        println!("Correct word was: {RED_BOLD}{current_word}{RESET}")
+        println!("Correct word was: {RED_BOLD}{current_word}{RESET}");
     }
     
     println!("----------------------");
