@@ -196,6 +196,10 @@ fn main() {
     println!("----------------------");
     
     for guess in answers {
+        if guess == current_word {
+            println!("| {guess} | CORRECT    |");
+            continue
+        }
         let score = analyzer.guess(guess.clone(), current_word.clone());
         let percentile = ((total_words - score) as f64 / total_words as f64) * 100f64;
         let mut spaces: usize = 4;
