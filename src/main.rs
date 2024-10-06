@@ -23,6 +23,14 @@ use clap::{Arg, Command};
 fn word_cmp(cur_word: &str, target_chars: &Vec<char>) -> String {   
     let mut output = String::new();
     let mut chars_count: HashMap<char, usize> = HashMap::new();
+    let mut exact_matches: HashMap<char, usize> = HashMap::new();
+    
+    // keep track of all green letters so letters aren't colored yellow too early
+    for (letter, target_letter) in cur_word.chars().zip(target_chars.into_iter()) {
+        if letter == *target_letter {
+            *exact_matches.entry(letter).or_insert(0) += 1;
+        }
+    }
     
     // count is kept track of here to make sure letters appear yellow as many times as they are in target
     for (letter, target_letter) in cur_word.chars().zip(target_chars.into_iter()) {
@@ -31,9 +39,13 @@ fn word_cmp(cur_word: &str, target_chars: &Vec<char>) -> String {
             .iter()
             .filter(|c| **c == letter)
             .count();
+        let default: usize = 0;
         if letter == *target_letter { output += GREEN_BOLD; }
         else if target_chars.contains(&letter) 
-            && (!chars_count.contains_key(&letter) || chars_count[&letter] < letter_count) { output += YELLOW_BOLD; }
+            && ((chars_count.get(&letter).unwrap_or(&default) 
+                + exact_matches.get(&letter).unwrap_or(&default)) < letter_count) { 
+                output += YELLOW_BOLD; 
+            }
         else { output += NORMAL_BOLD; }
         
         output.push(letter);
